@@ -1,0 +1,93 @@
+import win32com.client as wincl
+import speech_recognition as sr
+import pyautogui
+import wikipedia
+import wolframalpha
+import webbrowser
+import pyperclip
+
+
+
+
+
+speak = wincl.Dispatch("SAPI.SpVoice")
+
+
+def typing():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Speak the content :")
+        content = r.listen(source)
+        speak.Speak("You Said " + r.recognize_google(content))
+        print("Typing " + r.recognize_google(content))
+        pyautogui.click(100, 100)
+        pyautogui.typewrite(r.recognize_google(content))
+
+def wiki():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("What do you want to search:")
+        query = r.listen(source)
+        print("You Said" + r.recognize_google(query))
+        print("Searching for " + r.recognize_google(query))
+        res = wikipedia.summary(r.recognize_google(query), sentences=2)
+        speak.Speak(res)
+        return
+
+def wolf():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("What do you want to search:")
+        speak.Speak("What do you want to search:")
+        quest = r.listen(source)
+        print("You Said " + r.recognize_google(quest))
+        app_id = "WTEXUT-887TW26HJJ"
+        client = wolframalpha.Client(app_id)
+        res = client.query(r.recognize_google(quest))
+        answer = next(res.results).text
+        print(answer)
+        speak.Speak(answer)
+        return
+
+def map():
+    speak.Speak("Finding the location of this place on map sir!")
+    address = pyperclip.paste()
+    webbrowser.open('https://www.google.com/maps/place/' + address)
+    return
+
+
+
+
+
+# get audio from the microphone
+speak.Speak("Welcome Shubham!")
+check = 1
+while check == 1:
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Speak:")
+        audio = r.listen(source)
+
+    try:
+        text = str(r.recognize_google(audio))
+        speak.Speak(r.recognize_google(audio))
+        if 'start' in text:
+            typing()
+        if 'stop' in text:
+            check = 2
+        if 'find' in text:
+            wiki()
+        if 'question' in text:
+            wolf()
+        if 'map' in text:
+            map()
+        if 'bookmark' in text:
+            pyautogui.hotkey('ctrl', 'd')
+            speak.Speak("Bookmarked this page sir!")
+    except sr.UnknownValueError:
+        print("Could not understand audio")
+    except sr.RequestError as e:
+        print("Could not request results; {0}".format(e))
+
+
+
